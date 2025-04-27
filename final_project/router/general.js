@@ -1,6 +1,5 @@
 const express = require('express');
 let books = require("./booksdb.js");
-let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
@@ -52,10 +51,12 @@ public_users.get('/title/:title', function (req, res) {
 
 public_users.get('/review/:isbn', function (req, res) {
   const isbn = req.params.isbn;
-  const reviews = books[isbn].reviews;
+  if (!isbn) return res.status(404).json({ message: "ISBN is required" });
 
-  if (!books[isbn]) return res.status(404).json({ message: "Book not found" });
-  return res.status(200).json({ reviews: reviews });
+  const book = books[isbn];
+  if (!book) return res.status(404).json({ message: "Book not found" });
+
+  return res.status(200).json({ reviews: book.reviews });
 });
 
 module.exports.general = public_users;
